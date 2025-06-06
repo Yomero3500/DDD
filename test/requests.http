@@ -9,7 +9,7 @@ Content-Type: {{contentType}}
 {
     "nombre": "John Doe",
     "email": "john.doe@example.com",
-    "contrasena": "Password123",
+    "contrasena": "Password123!",
     "idioma": "es",
     "zonaHoraria": "America/Mexico_City"
 }
@@ -20,12 +20,12 @@ Content-Type: {{contentType}}
 
 {
     "email": "john.doe@example.com",
-    "password": "Password123"
+    "password": "Password123!"
 }
 
 ### Obtener usuario por ID
 # Reemplaza {userId} con el ID real obtenido después de registrar
-GET {{baseUrl}}/usuarios/{userId}
+GET {{baseUrl}}/usuarios/{6842be141f3eb67a88554b2e}
 
 ### Actualizar perfil de usuario
 # Reemplaza {userId} con el ID real
@@ -40,12 +40,12 @@ Content-Type: {{contentType}}
 
 ### Cambiar contraseña
 # Reemplaza {userId} con el ID real
-PUT {{baseUrl}}/usuarios/{userId}/password
+PUT {{baseUrl}}/usuarios/{6842be141f3eb67a88554b2e}/password
 Content-Type: {{contentType}}
 
 {
-    "oldPassword": "Password123",
-    "newPassword": "NewPassword123"
+    "oldPassword": "Password123!",
+    "newPassword": "NewPassword123!"
 }
 
 ### Caso de prueba: Registro con email inválido
@@ -55,7 +55,7 @@ Content-Type: {{contentType}}
 {
     "nombre": "Invalid User",
     "email": "invalid-email",
-    "contrasena": "Password123",
+    "contrasena": "Password123!",
     "idioma": "es",
     "zonaHoraria": "America/Mexico_City"
 }
@@ -78,7 +78,7 @@ Content-Type: {{contentType}}
 
 {
     "email": "john.doe@example.com",
-    "password": "WrongPassword123"
+    "password": "WrongPassword123!"
 }
 
 ### Caso de prueba: Obtener usuario que no existe
@@ -101,6 +101,6 @@ PUT {{baseUrl}}/usuarios/{userId}/password
 Content-Type: {{contentType}}
 
 {
-    "oldPassword": "WrongOldPassword",
-    "newPassword": "NewPassword123"
+    "oldPassword": "WrongOldPassword!",
+    "newPassword": "NewPassword123!"
 }

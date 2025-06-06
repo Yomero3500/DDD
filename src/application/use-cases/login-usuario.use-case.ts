@@ -18,15 +18,13 @@ export class LoginUsuarioUseCase {
   async execute(dto: LoginDTO): Promise<LoginResponseDTO> {
     const usuario = await this.usuarioRepository.findByEmail(dto.email);
     if (!usuario) {
-      throw new Error('Credenciales inválidas');
+      throw new Error('Credenciales inválidas, email no encontrado');
+    }
+    // Comparar la contraseña en texto plano con el hash almacenado
+    if (!Password.compare(dto.password, usuario.getPassword())) {
+      throw new Error('Credenciales inválidas, contraseña incorrecta');
     }
 
-    const password = Password.create(dto.password);
-    if (!this.comparePasswords(password, usuario)) {
-      throw new Error('Credenciales inválidas');
-    }
-
-    // Generar token (implementación básica)
     const token = this.generateToken(usuario);
 
     return {
@@ -35,13 +33,7 @@ export class LoginUsuarioUseCase {
     };
   }
 
-  private comparePasswords(inputPassword: Password, usuario: Usuario): boolean {
-    // En una implementación real, aquí se compararían los hashes
-    return inputPassword.getHashedValue() === usuario.getPassword();
-  }
-
   private generateToken(usuario: Usuario): string {
-    // En una implementación real, usar JWT u otro sistema de tokens
     return Buffer.from(`${usuario.getId()}:${Date.now()}`).toString('base64');
   }
 }

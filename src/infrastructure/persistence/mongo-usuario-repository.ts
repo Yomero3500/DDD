@@ -91,7 +91,7 @@ export class MongoUsuarioRepository implements IUsuarioRepository {
       doc._id.toString(),
       doc.nombre,
       new Email(doc.email),
-      Password.create(doc.contrasena), // Nota: esto es una simplificación, en realidad no deberíamos re-hashear
+      Password.fromHash(doc.contrasena), // CORRECTO: reconstruir desde el hash
       new Perfil(doc.perfil.idioma, doc.perfil.zonaHoraria),
       new Rol(doc.rol as TipoRol)
     );
