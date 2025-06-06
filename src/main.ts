@@ -26,7 +26,10 @@ const usuarioController = new UsuarioController(usuarioService);
 
 // Routes
 app.post('/usuarios', (req, res) => usuarioController.registrarUsuario(req, res));
+app.post('/usuarios/login', (req, res) => usuarioController.login(req, res));
 app.get('/usuarios/:id', (req, res) => usuarioController.obtenerUsuario(req, res));
+app.put('/usuarios/:id/perfil', (req, res) => usuarioController.actualizarPerfil(req, res));
+app.put('/usuarios/:id/password', (req, res) => usuarioController.cambiarPassword(req, res));
 
 const PORT = process.env.PORT || 3000;
 

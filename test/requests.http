@@ -1,0 +1,106 @@
+# Variables globales
+@baseUrl = http://localhost:3000
+@contentType = application/json
+
+### Registrar nuevo usuario
+POST {{baseUrl}}/usuarios
+Content-Type: {{contentType}}
+
+{
+    "nombre": "John Doe",
+    "email": "john.doe@example.com",
+    "contrasena": "Password123",
+    "idioma": "es",
+    "zonaHoraria": "America/Mexico_City"
+}
+
+### Iniciar sesión
+POST {{baseUrl}}/usuarios/login
+Content-Type: {{contentType}}
+
+{
+    "email": "john.doe@example.com",
+    "password": "Password123"
+}
+
+### Obtener usuario por ID
+# Reemplaza {userId} con el ID real obtenido después de registrar
+GET {{baseUrl}}/usuarios/{userId}
+
+### Actualizar perfil de usuario
+# Reemplaza {userId} con el ID real
+PUT {{baseUrl}}/usuarios/{userId}/perfil
+Content-Type: {{contentType}}
+
+{
+    "nombre": "John Doe Updated",
+    "idioma": "en",
+    "zonaHoraria": "America/New_York"
+}
+
+### Cambiar contraseña
+# Reemplaza {userId} con el ID real
+PUT {{baseUrl}}/usuarios/{userId}/password
+Content-Type: {{contentType}}
+
+{
+    "oldPassword": "Password123",
+    "newPassword": "NewPassword123"
+}
+
+### Caso de prueba: Registro con email inválido
+POST {{baseUrl}}/usuarios
+Content-Type: {{contentType}}
+
+{
+    "nombre": "Invalid User",
+    "email": "invalid-email",
+    "contrasena": "Password123",
+    "idioma": "es",
+    "zonaHoraria": "America/Mexico_City"
+}
+
+### Caso de prueba: Registro con contraseña débil
+POST {{baseUrl}}/usuarios
+Content-Type: {{contentType}}
+
+{
+    "nombre": "Weak Password User",
+    "email": "weak@example.com",
+    "contrasena": "123",
+    "idioma": "es",
+    "zonaHoraria": "America/Mexico_City"
+}
+
+### Caso de prueba: Iniciar sesión con credenciales incorrectas
+POST {{baseUrl}}/usuarios/login
+Content-Type: {{contentType}}
+
+{
+    "email": "john.doe@example.com",
+    "password": "WrongPassword123"
+}
+
+### Caso de prueba: Obtener usuario que no existe
+GET {{baseUrl}}/usuarios/non-existent-id
+
+### Caso de prueba: Actualizar perfil con datos inválidos
+# Reemplaza {userId} con el ID real
+PUT {{baseUrl}}/usuarios/{userId}/perfil
+Content-Type: {{contentType}}
+
+{
+    "nombre": "",
+    "idioma": "invalid-locale",
+    "zonaHoraria": "invalid-timezone"
+}
+
+### Caso de prueba: Cambiar contraseña con contraseña actual incorrecta
+# Reemplaza {userId} con el ID real
+PUT {{baseUrl}}/usuarios/{userId}/password
+Content-Type: {{contentType}}
+
+{
+    "oldPassword": "WrongOldPassword",
+    "newPassword": "NewPassword123"
+}

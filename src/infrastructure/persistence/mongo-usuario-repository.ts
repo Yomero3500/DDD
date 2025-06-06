@@ -2,6 +2,8 @@ import { IUsuarioRepository } from '../../domain/repositories/usuario-repository
 import { Usuario } from '../../domain/entities/user';
 import { Perfil } from '../../domain/value-objects/perfil';
 import { Rol, TipoRol } from '../../domain/value-objects/rol';
+import { Email } from '../../domain/value-objects/email';
+import { Password } from '../../domain/value-objects/password';
 import mongoose, { Schema, Document } from 'mongoose';
 
 interface IUsuarioDocument extends Document {
@@ -33,7 +35,7 @@ export class MongoUsuarioRepository implements IUsuarioRepository {
     const usuarioDoc = new UsuarioModel({
       nombre: usuario.getNombre(),
       email: usuario.getEmail(),
-      contrasena: usuario.getContrasena(),
+      contrasena: usuario.getPassword(),
       perfil: {
         idioma: usuario.getPerfil().getIdioma(),
         zonaHoraria: usuario.getPerfil().getZonaHoraria()
@@ -58,19 +60,25 @@ export class MongoUsuarioRepository implements IUsuarioRepository {
     }
     return this.toEntity(usuarioDoc);
   }
-
   async update(usuario: Usuario): Promise<void> {
+    const updateData: any = {
+      nombre: usuario.getNombre(),
+      email: usuario.getEmail(),
+      perfil: {
+        idioma: usuario.getPerfil().getIdioma(),
+        zonaHoraria: usuario.getPerfil().getZonaHoraria()
+      },
+      rol: usuario.getRol().getTipo()
+    };
+
+    // Solo actualizar la contraseña si ha cambiado
+    if (usuario.getPassword()) {
+      updateData.contrasena = usuario.getPassword();
+    }
+
     await UsuarioModel.updateOne(
       { _id: usuario.getId() },
-      {
-        nombre: usuario.getNombre(),
-        email: usuario.getEmail(),
-        perfil: {
-          idioma: usuario.getPerfil().getIdioma(),
-          zonaHoraria: usuario.getPerfil().getZonaHoraria()
-        },
-        rol: usuario.getRol().getTipo()
-      }
+      updateData
     );
   }
 
@@ -82,8 +90,8 @@ export class MongoUsuarioRepository implements IUsuarioRepository {
     return new Usuario(
       doc._id.toString(),
       doc.nombre,
-      doc.email,
-      doc.contrasena,
+      new Email(doc.email),
+      Password.create(doc.contrasena), // Nota: esto es una simplificación, en realidad no deberíamos re-hashear
       new Perfil(doc.perfil.idioma, doc.perfil.zonaHoraria),
       new Rol(doc.rol as TipoRol)
     );

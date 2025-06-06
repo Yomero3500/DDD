@@ -1,47 +1,42 @@
 import { Usuario } from '../../domain/entities/user';
+import { IUsuarioRepository } from '../../domain/repositories/usuario-repository';
+import { CreateUserDTO, UserDTO, UpdatePerfilDTO } from '../dtos/user-dto';
+import { RegistrarUsuarioUseCase } from '../use-cases/registrar-usuario.use-case';
+import { LoginUsuarioUseCase, LoginDTO, LoginResponseDTO } from '../use-cases/login-usuario.use-case';
+import { ActualizarPerfilUseCase } from '../use-cases/actualizar-perfil.use-case';
+import { CambiarPasswordUseCase, CambiarPasswordDTO } from '../use-cases/cambiar-password.use-case';
+import { Email } from '../../domain/value-objects/email';
+import { Password } from '../../domain/value-objects/password';
 import { Perfil } from '../../domain/value-objects/perfil';
 import { Rol, TipoRol } from '../../domain/value-objects/rol';
-import { IUsuarioRepository } from '../../domain/repositories/usuario-repository';
-import { CreateUserDTO, UserDTO } from '../dtos/user-dto';
-import { UserRegisteredEvent } from '../../domain/events/user-events';
 
 export class UsuarioService {
-  constructor(private usuarioRepository: IUsuarioRepository) {}
+  private registrarUsuarioUseCase: RegistrarUsuarioUseCase;
+  private loginUsuarioUseCase: LoginUsuarioUseCase;
+  private actualizarPerfilUseCase: ActualizarPerfilUseCase;
+  private cambiarPasswordUseCase: CambiarPasswordUseCase;
 
-  async registrarUsuario(createUserDTO: CreateUserDTO): Promise<UserDTO> {
-    // Verificar si el usuario ya existe
-    const usuarioExistente = await this.usuarioRepository.findByEmail(createUserDTO.email);
-    if (usuarioExistente) {
-      throw new Error('El usuario ya existe');
-    }
+  constructor(private usuarioRepository: IUsuarioRepository) {
+    this.registrarUsuarioUseCase = new RegistrarUsuarioUseCase(usuarioRepository);
+    this.loginUsuarioUseCase = new LoginUsuarioUseCase(usuarioRepository);
+    this.actualizarPerfilUseCase = new ActualizarPerfilUseCase(usuarioRepository);
+    this.cambiarPasswordUseCase = new CambiarPasswordUseCase(usuarioRepository);
+  }
 
-    // Crear objetos de valor
-    const perfil = new Perfil(createUserDTO.idioma, createUserDTO.zonaHoraria);
-    const rol = new Rol(TipoRol.ESPECTADOR); // Por defecto, todos los usuarios son espectadores
+  async registrarUsuario(dto: CreateUserDTO): Promise<UserDTO> {
+    return this.registrarUsuarioUseCase.execute(dto);
+  }
 
-    // Crear entidad de usuario
-    const usuario = new Usuario(
-      Math.random().toString(36).substring(2, 9), // Generar ID simple para el ejemplo
-      createUserDTO.nombre,
-      createUserDTO.email,
-      createUserDTO.contrasena,
-      perfil,
-      rol
-    );
+  async login(dto: LoginDTO): Promise<LoginResponseDTO> {
+    return this.loginUsuarioUseCase.execute(dto);
+  }
 
-    // Persistir el usuario
-    await this.usuarioRepository.save(usuario);
+  async actualizarPerfil(userId: string, dto: UpdatePerfilDTO): Promise<void> {
+    await this.actualizarPerfilUseCase.execute({ userId, ...dto });
+  }
 
-    // Emitir evento de registro
-    const event = new UserRegisteredEvent(
-      usuario.getId(),
-      usuario.getEmail(),
-      usuario.getNombre()
-    );
-    // Aquí se emitiría el evento (necesitaríamos un event bus)
-
-    // Retornar DTO
-    return this.toDTO(usuario);
+  async cambiarPassword(dto: CambiarPasswordDTO): Promise<void> {
+    await this.cambiarPasswordUseCase.execute(dto);
   }
 
   async obtenerUsuarioPorId(id: string): Promise<UserDTO | null> {
@@ -53,15 +48,45 @@ export class UsuarioService {
   }
 
   private toDTO(usuario: Usuario): UserDTO {
+    const rol = usuario.getRol();
     return {
       id: usuario.getId(),
       nombre: usuario.getNombre(),
       email: usuario.getEmail(),
-      rol: usuario.getRol().getTipo(),
+      rol: rol.getTipo(),
+      rolDescripcion: this.getRolDescripcion(rol),
       perfil: {
         idioma: usuario.getPerfil().getIdioma(),
         zonaHoraria: usuario.getPerfil().getZonaHoraria()
-      }
+      },
+      permisos: this.getPermisosPorRol(rol)
     };
+  }
+
+  private getRolDescripcion(rol: Rol): string {
+    switch (rol.getTipo()) {
+      case TipoRol.ESPECTADOR:
+        return 'Usuario que puede ver streams y participar en el chat';
+      case TipoRol.STREAMER:
+        return 'Creador de contenido que puede transmitir en vivo';
+      case TipoRol.MODERADOR:
+        return 'Usuario con permisos especiales de moderación';
+      default:
+        return 'Rol no definido';
+    }
+  }
+
+  private getPermisosPorRol(rol: Rol): string[] {
+    const permisos: string[] = ['ver_streams', 'usar_chat'];
+    
+    if (rol.esStreamer()) {
+      permisos.push('crear_stream', 'configurar_canal', 'ver_estadisticas');
+    }
+    
+    if (rol.esModerador()) {
+      permisos.push('moderar_chat', 'banear_usuarios', 'eliminar_mensajes');
+    }
+    
+    return permisos;
   }
 }

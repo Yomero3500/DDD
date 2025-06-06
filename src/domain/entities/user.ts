@@ -1,19 +1,28 @@
 import { Perfil } from '../value-objects/perfil';
 import { Rol } from '../value-objects/rol';
+import { Email } from '../value-objects/email';
+import { Password } from '../value-objects/password';
 
 export class Usuario {
   private id: string;
   private nombre: string;
-  private email: string;
-  private contrasena: string;
+  private email: Email;
+  private password: Password;
   private perfil: Perfil;
   private rol: Rol;
 
-  constructor(id: string, nombre: string, email: string, contrasena: string, perfil: Perfil, rol: Rol) {
+  constructor(
+    id: string,
+    nombre: string,
+    email: Email,
+    password: Password,
+    perfil: Perfil,
+    rol: Rol
+  ) {
     this.id = id;
     this.nombre = nombre;
     this.email = email;
-    this.contrasena = contrasena;
+    this.password = password;
     this.perfil = perfil;
     this.rol = rol;
   }
@@ -28,11 +37,11 @@ export class Usuario {
   }
 
   getEmail(): string {
-    return this.email;
+    return this.email.getValue();
   }
 
-  getContrasena(): string {
-    return this.contrasena;
+  getPassword(): string {
+    return this.password.getHashedValue();
   }
 
   getPerfil(): Perfil {
@@ -45,11 +54,23 @@ export class Usuario {
 
   // Métodos de dominio
   cambiarRol(nuevoRol: Rol): void {
+    const oldRol = this.rol;
     this.rol = nuevoRol;
-    // Aquí se podría emitir un evento de dominio RoleChangedEvent
+    // Aquí se emitiría el evento RoleChangedEvent
   }
 
   actualizarPerfil(nuevoPerfil: Perfil): void {
     this.perfil = nuevoPerfil;
+  }
+
+  cambiarPassword(newPassword: Password): void {
+    this.password = newPassword;
+  }
+
+  actualizarNombre(nuevoNombre: string): void {
+    if (!nuevoNombre || nuevoNombre.trim().length === 0) {
+      throw new Error('El nombre no puede estar vacío');
+    }
+    this.nombre = nuevoNombre;
   }
 }
