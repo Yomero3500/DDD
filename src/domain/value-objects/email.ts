@@ -2,12 +2,14 @@ export class Email {
   private readonly value: string;
 
   constructor(value: string) {
-    this.validateEmail(value);
-    this.value = value;
+    const normalized = value.trim().toLowerCase();
+    this.validateEmail(normalized);
+    this.value = normalized;
   }
 
   private validateEmail(email: string): void {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    // RFC 5322 Official Standard
+    const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
     if (!emailRegex.test(email)) {
       throw new Error('Email inválido');
     }

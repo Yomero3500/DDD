@@ -5,9 +5,6 @@ import { RegistrarUsuarioUseCase } from '../use-cases/registrar-usuario.use-case
 import { LoginUsuarioUseCase, LoginDTO, LoginResponseDTO } from '../use-cases/login-usuario.use-case';
 import { ActualizarPerfilUseCase } from '../use-cases/actualizar-perfil.use-case';
 import { CambiarPasswordUseCase, CambiarPasswordDTO } from '../use-cases/cambiar-password.use-case';
-import { Email } from '../../domain/value-objects/email';
-import { Password } from '../../domain/value-objects/password';
-import { Perfil } from '../../domain/value-objects/perfil';
 import { Rol, TipoRol } from '../../domain/value-objects/rol';
 
 export class UsuarioService {

@@ -7,8 +7,11 @@ export enum TipoRol {
 export class Rol {
   private readonly tipo: TipoRol;
 
-  constructor(tipo: TipoRol) {
-    this.tipo = tipo;
+  constructor(tipo: string) {
+    if (!Object.values(TipoRol).includes(tipo as TipoRol)) {
+      throw new Error('Tipo de rol inválido');
+    }
+    this.tipo = tipo as TipoRol;
   }
 
   getTipo(): TipoRol {

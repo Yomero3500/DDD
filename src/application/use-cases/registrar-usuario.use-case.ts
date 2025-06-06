@@ -33,18 +33,16 @@ export class RegistrarUsuarioUseCase {
       rol
     );
 
-    // Persistir
     await this.usuarioRepository.save(usuario);
 
-    // Emitir evento
     const event = new UserRegisteredEvent(
       usuario.getId(),
       usuario.getEmail(),
       usuario.getNombre()
     );
-    // TODO: Publicar evento
+    //Publicar evento
 
-    // Retornar DTO
+    //Retornar DTO
     return this.toDTO(usuario);
   }
 
